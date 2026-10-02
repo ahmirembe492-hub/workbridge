@@ -1,33 +1,57 @@
+<script setup>
+import Navbar from './components/Navbar.vue'
+import JobCard from './components/JobCard.vue'
+import { ref } from 'vue'
+
+const searchKeyword = ref('')
+const searchLocation = ref('')
+
+const jobs = [
+  {
+    title: 'Frontend Developer',
+    company: 'Acme Technologies',
+    location: 'Kigali',
+    type: 'Full-time'
+  },
+  {
+    title: 'Backend Developer',
+    company: 'Bright Systems',
+    location: 'Kigali',
+    type: 'Full-time'
+  },
+  {
+    title: 'UI/UX Designer',
+    company: 'Creative Labs',
+    location: 'Remote',
+    type: 'Full-time'
+  }
+]
+const searchResults = ref([])
+function searchJobs() {
+  const keyword = searchKeyword.value.trim().toLowerCase()
+  const location = searchLocation.value.trim().toLowerCase()
+
+  searchResults.value = jobs.filter(job => {
+    const matchesKeyword =
+      !keyword ||
+      job.title.toLowerCase().includes(keyword) ||
+      job.company.toLowerCase().includes(keyword)
+
+    const matchesLocation =
+      !location ||
+      job.location.toLowerCase().includes(location)
+
+    return matchesKeyword && matchesLocation
+  })
+}
+
+</script>
 <template>
   <div class="app">
 
     <!-- Navigation -->
-    <header class="navbar">
-      <div class="container navbar-content">
-
-        <a href="/" class="logo">
-          WorkBridge
-        </a>
-
-        <nav class="nav-links">
-          <a href="#">Find Jobs</a>
-          <a href="#">Companies</a>
-          <a href="#">Career Advice</a>
-        </nav>
-
-        <div class="nav-actions">
-          <button class="login-button">
-            Log in
-          </button>
-
-          <button class="signup-button">
-            Sign up
-          </button>
-        </div>
-
-      </div>
-    </header>
-
+    <Navbar />
+    
 
     <!-- Hero -->
     <main>
@@ -58,8 +82,10 @@
                 <label>What are you looking for?</label>
 
                 <input
+                  v-model="searchKeyword"
                   type="text"
-                  placeholder="Job title, skill or keyword"
+                  placeholder="Job title, skill or keyword"    
+            
                 />
               </div>
 
@@ -67,12 +93,14 @@
                 <label>Where?</label>
 
                 <input
-                  type="text"
-                  placeholder="City or location"
+                v-model="searchLocation"
+                type="text"
+                placeholder="City or location"
+                 
                 />
               </div>
 
-              <button class="search-button">
+              <button class="search-button" @click="searchJobs">
                 Search jobs
               </button>
 
@@ -83,126 +111,117 @@
         </div>
       </section>
 
+<!-- Search Results -->
+<section
+  v-if="searchResults.length > 0"
+  class="search-results"
+>
+  <div class="container">
 
-      <!-- Featured Jobs -->
-      <section class="featured-jobs">
+    <h2>Search results</h2>
 
-        <div class="container">
+    <div class="job-grid">
 
-          <div class="section-header">
+      <article
+          v-for="job in searchResults"
+        :key="job.title"
+        class="job-card"
+      >
 
-            <div>
-              <p class="section-label">
-                OPPORTUNITIES
-              </p>
+        <div class="company-logo">
+          {{ job.company.charAt(0) }}
+        </div>
 
-              <h2>
-                Featured jobs
-              </h2>
-            </div>
+        <div class="job-content">
 
-            <a href="#">
-              View all jobs →
-            </a>
+          <h3>
+            {{ job.title }}
+          </h3>
 
-          </div>
+          <p class="company-name">
+            {{ job.company }}
+          </p>
 
-
-          <div class="job-grid">
-
-            <article class="job-card">
-
-              <div class="company-logo">
-                A
-              </div>
-
-              <div class="job-content">
-
-                <h3>
-                  Frontend Developer
-                </h3>
-
-                <p class="company-name">
-                  Acme Technologies
-                </p>
-
-                <p class="job-location">
-                  Kigali · Full-time
-                </p>
-
-              </div>
-
-              <button class="apply-button">
-                Apply
-              </button>
-
-            </article>
-
-
-            <article class="job-card">
-
-              <div class="company-logo">
-                B
-              </div>
-
-              <div class="job-content">
-
-                <h3>
-                  Backend Developer
-                </h3>
-
-                <p class="company-name">
-                  Bright Systems
-                </p>
-
-                <p class="job-location">
-                  Kigali · Full-time
-                </p>
-
-              </div>
-
-              <button class="apply-button">
-                Apply
-              </button>
-
-            </article>
-
-
-            <article class="job-card">
-
-              <div class="company-logo">
-                C
-              </div>
-
-              <div class="job-content">
-
-                <h3>
-                  UI/UX Designer
-                </h3>
-
-                <p class="company-name">
-                  Creative Labs
-                </p>
-
-                <p class="job-location">
-                  Remote · Full-time
-                </p>
-
-              </div>
-
-              <button class="apply-button">
-                Apply
-              </button>
-
-            </article>
-
-          </div>
+          <p class="job-location">
+            {{ job.location }} · {{ job.type }}
+          </p>
 
         </div>
 
-      </section>
+        <button class="apply-button">
+          Apply
+        </button>
 
-    </main>
+      </article>
+
+    </div>
+
+  </div>
+</section>
+
+
+<!-- No Search Results -->
+<section
+  v-else-if="searchKeyword || searchLocation"
+  class="no-results"
+>
+  <div class="container">
+
+    <div class="no-results-content">
+
+      <div class="no-results-icon">
+        🔍
+      </div>
+
+      <h2>No jobs found</h2>
+
+      <p>
+        We couldn't find jobs matching your search.
+        Try a different job title or location.
+      </p>
+
+    </div>
+
+  </div>
+</section>
+<!-- Featured Jobs -->
+<section class="featured-jobs">
+
+  <div class="container">
+
+    <div class="section-header">
+
+      <div>
+        <p class="section-label">
+          OPPORTUNITIES
+        </p>
+
+        <h2>
+          Featured jobs
+        </h2>
+      </div>
+
+      <a href="#">
+        View all jobs →
+      </a>
+
+    </div>
+
+    <div class="job-grid">
+
+<JobCard
+  v-for="job in jobs"
+  :key="job.title"
+  :job="job"
+/>
+    
+
+    </div>
+
+  </div>
+
+</section>
+</main>
 
   </div>
 </template>
@@ -216,9 +235,17 @@
 * {
   box-sizing: border-box;
 }
+html,
+body,
+#app {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   margin: 0;
+  width: 100%;
   font-family: Arial, Helvetica, sans-serif;
   color: #111827;
   background: #ffffff;
@@ -230,77 +257,17 @@ input {
 }
 
 
-/* =========================
-   GENERAL
-========================= */
+
+
 
 .container {
-  width: min(1180px, 92%);
+  width: 100%;
+  max-width: 1180px;
   margin: 0 auto;
+  padding: 0 24px;
 }
 
 
-/* =========================
-   NAVBAR
-========================= */
-
-.navbar {
-  height: 76px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #ffffff;
-}
-
-.navbar-content {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo {
-  text-decoration: none;
-  color: #111827;
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.nav-links {
-  display: flex;
-  gap: 32px;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: #4b5563;
-  font-size: 15px;
-}
-
-.nav-links a:hover {
-  color: #111827;
-}
-
-.nav-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.login-button,
-.signup-button {
-  padding: 10px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.login-button {
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-}
-
-.signup-button {
-  border: 1px solid #111827;
-  background: #111827;
-  color: #ffffff;
-}
 
 
 /* =========================
@@ -388,6 +355,40 @@ input {
   background: #111827;
   color: #ffffff;
   cursor: pointer;
+}
+.no-results {
+  padding: 60px 0;
+}
+
+.no-results-content {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 50px 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.no-results-icon {
+  font-size: 36px;
+  margin-bottom: 15px;
+}
+
+.no-results-content h2 {
+  margin: 0 0 10px;
+  font-size: 28px;
+}
+
+.no-results-content p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.search-results h2 {
+  margin: 0 0 30px;
+  font-size: 32px;
 }
 
 
